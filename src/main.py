@@ -53,10 +53,15 @@ class EbayClient:
         searchButton.click()
 
     def search(self, query):
-        self._search(query)
+        terms = query.split(" ") 
+        searchTerms = list(filter(lambda x: x[0] != "-", terms))
+        dropTerms   = list(filter(lambda x: x[0] == "-", terms))
+        self._search(" ".join(searchTerms))
         parser = BeautifulSoup(self.driver.page_source)
         ads = {}
         for link in parser.find_all("a", {"class": "ellipsis"}):
+            if any([t.lower() in link.get_text().lower() for t in dropTerms]):
+                continue
             ads[link.get_text()] = "https://www.ebay-kleinanzeigen.de" + link["href"]
         return ads
 
